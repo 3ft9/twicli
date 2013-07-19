@@ -12,6 +12,8 @@ class StreamCatcher(TwythonStreamer):
 			self.disconnect()
 
 	def _run(self, screen):
+		curses.start_color()
+		curses.use_default_colors()
 		curses.echo()
 		self.nrows, self.ncols = screen.getmaxyx()
 		self.linewrap.width = self.ncols
