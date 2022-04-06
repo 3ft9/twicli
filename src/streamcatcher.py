@@ -1,9 +1,11 @@
 from twython import TwythonStreamer
 import curses
 import textwrap
+import HTMLParser
 
 class StreamCatcher(TwythonStreamer):
 	def start(self):
+		self.htmlparser = HTMLParser.HTMLParser()
 		self.lines = []
 		self.linewrap = textwrap.TextWrapper()
 		try:
@@ -43,7 +45,7 @@ class StreamCatcher(TwythonStreamer):
 
 	def on_success(self, data):
 		if 'text' in data:
-			self._addline(data['user']['name'].encode('utf-8') + ' [' + data['user']['screen_name'].encode('utf-8') + ']: ' + data['text'].encode('utf-8'))
+			self._addline(data['user']['name'].encode('utf-8') + ' [' + data['user']['screen_name'].encode('utf-8') + ']: ' + self.htmlparser.unescape(data['text']).decode('utf-8'))
 		elif 'friends' in data:
 			num = len(data['friends'])
 			self._addline('=> You are following ' + str(num) + ' user' + ('' if num == 1 else 's'))
@@ -51,4 +53,4 @@ class StreamCatcher(TwythonStreamer):
 			self._addline('Received: ' + str(data))
 
 	def on_error(self, status_code, data):
-		self.addline('ERR: [' + status_code + '] ' + data)
+		self._addline('ERR: [' + str(status_code) + '] ' + data)
